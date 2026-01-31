@@ -5,14 +5,14 @@ on:
 
 jobs:
   build:
-    # 核心变动：改用 macOS 环境，避开 Linux 环境下杂乱的 SDK 预览版
-    runs-on: macos-13
+    # 切换到最新的 macOS 环境，结构更单纯，避开预览版 SDK 的解析冲突
+    runs-on: macos-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 保持 Java 11，这是 Gradle 6.7.1 的最佳拍档
+      # 使用 Java 11 以确保与 Gradle 6.7.1 的解析兼容性
       - name: set up JDK 11
         uses: actions/setup-java@v4
         with:
@@ -23,12 +23,13 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 执行构建（OSX 环境下不需要额外清理 SDK）
+      # 执行编译
       - name: Build with Gradle
         run: ./gradlew assembleDebug --no-daemon
 
+      # 这里的 path 建议使用通配符确保能抓取到生成的 APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: vmq-app-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: vmq-app-final-apk
+          path: "app/build/outputs/apk/debug/*.apk"
